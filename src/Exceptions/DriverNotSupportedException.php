@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Kosadchiy\LaravelParallelDb\Exceptions;
+
+final class DriverNotSupportedException extends ParallelExecutionException
+{
+}

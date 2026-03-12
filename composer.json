@@ -1,0 +1,40 @@
+{
+    "name": "kosadchiy/laravel-parallel-db",
+    "description": "Laravel package for in-process parallel SQL execution via native pgsql/mysqli async APIs.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "illuminate/database": "^12.0",
+        "illuminate/support": "^12.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "suggest": {
+        "ext-pgsql": "Required for PostgreSQL async execution",
+        "ext-mysqli": "Required for MySQL async execution"
+    },
+    "autoload": {
+        "psr-4": {
+            "Kosadchiy\\LaravelParallelDb\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kosadchiy\\LaravelParallelDb\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Kosadchiy\\LaravelParallelDb\\LaravelParallelDbServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
