@@ -254,7 +254,7 @@ Observed trends from the local test environment:
 
 Suggested benchmark matrix for comparing different latency profiles and scheduler settings:
 
-| sleep_ms | maxConcurrency | sequential avg ms | parallel avg ms | speedup x | Notes |
+| query latency (ms) | maxConcurrency | sequential avg ms | parallel avg ms | speedup x | Notes |
 | --- | --- | ---: | ---: | ---: | --- |
 | 50 | 1 | 310.82 | 302.87 | 1.03 | Near-sequential control case, as expected |
 | 50 | 2 | 313.10 | 181.11 | 1.73 | Noticeable gain with limited parallel fan-out |
@@ -269,13 +269,13 @@ Suggested benchmark matrix for comparing different latency profiles and schedule
 
 Cold-start overhead looks different and should be measured separately. In the following run, pooling was disabled and `warmup=0`, so the async path had to pay full connection setup cost. For this kind of cold tiny-query scenario, `p50` is more representative than `avg`, because a single startup outlier can skew the sequential mean.
 
-| sleep_ms | maxConcurrency | pool | warmup | sequential p50 ms | parallel p50 ms | speedup x | Notes |
+| query latency (ms) | maxConcurrency | pool | warmup | sequential p50 ms | parallel p50 ms | speedup x | Notes |
 | --- | --- | --- | --- | ---: | ---: | ---: | --- |
 | 0 | 3 | off | 0 | 13.78 | 151.27 | 0.09 | Cold tiny-query path was dominated by connection setup and async transport overhead |
 
 Cold-start threshold sweep for the same environment (`pool=off`, `warmup=0`, `maxConcurrency=3`):
 
-| sleep_ms | sequential p50 ms | parallel p50 ms | Notes |
+| query latency (ms) | sequential p50 ms | parallel p50 ms | Notes |
 | --- | ---: | ---: | --- |
 | 0 | 13.78 | 151.27 | Parallel overhead dominated |
 | 5 | 47.58 | 168.23 | Parallel overhead still dominated |
