@@ -27,21 +27,47 @@ final class MySqlConnectionFactory implements ConnectionFactoryInterface
             }
         }
 
-        $connected = @$connection->real_connect(
-            hostname: (string) ($config['host'] ?? '127.0.0.1'),
-            username: (string) ($config['username'] ?? ''),
-            password: (string) ($config['password'] ?? ''),
-            database: (string) ($config['database'] ?? ''),
-            port: (int) ($config['port'] ?? 3306),
-            socket: isset($config['unix_socket']) ? (string) $config['unix_socket'] : null,
-        );
+        $warning = null;
+        set_error_handler(static function (int $severity, string $message) use (&$warning): bool {
+            $warning = $message;
+
+            return true;
+        });
+
+        try {
+            $connected = $connection->real_connect(
+                hostname: (string) ($config['host'] ?? '127.0.0.1'),
+                username: (string) ($config['username'] ?? ''),
+                password: (string) ($config['password'] ?? ''),
+                database: (string) ($config['database'] ?? ''),
+                port: (int) ($config['port'] ?? 3306),
+                socket: isset($config['unix_socket']) ? (string) $config['unix_socket'] : null,
+            );
+        } finally {
+            restore_error_handler();
+        }
 
         if ($connected !== true) {
-            throw new ParallelExecutionException('Unable to create MySQL async connection: ' . $connection->connect_error);
+            throw new ParallelExecutionException($warning ?? ('Unable to create MySQL async connection: ' . $connection->connect_error));
         }
 
         $charset = is_string($config['charset'] ?? null) ? $config['charset'] : 'utf8mb4';
-        $connection->set_charset($charset);
+        $warning = null;
+        set_error_handler(static function (int $severity, string $message) use (&$warning): bool {
+            $warning = $message;
+
+            return true;
+        });
+
+        try {
+            $charsetSet = $connection->set_charset($charset);
+        } finally {
+            restore_error_handler();
+        }
+
+        if ($charsetSet !== true) {
+            throw new ParallelExecutionException($warning ?? ('Unable to set MySQL connection charset to [' . $charset . '].'));
+        }
 
         return $connection;
     }
@@ -49,7 +75,7 @@ final class MySqlConnectionFactory implements ConnectionFactoryInterface
     public function close(mixed $connection): void
     {
         if ($connection instanceof mysqli) {
-            @$connection->close();
+            $connection->close();
         }
     }
 }

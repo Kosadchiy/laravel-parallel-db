@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb\DTO;
 
-final class RunningQuery
+final readonly class RunningQuery
 {
     /**
+     * @param CompiledQuery $query
+     * @param string $driver
      * @param mixed $connectionHandle
      * @param resource|object|null $socket
+     * @param float $startedAt
      */
     public function __construct(
-        public readonly CompiledQuery $query,
-        public readonly string $driver,
-        public readonly mixed $connectionHandle,
-        public readonly mixed $socket,
-        public readonly float $startedAt,
+        public CompiledQuery $query,
+        public string $driver,
+        public mixed $connectionHandle,
+        public mixed $socket,
+        public float $startedAt,
     ) {
     }
 }

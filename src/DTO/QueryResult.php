@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb\DTO;
 
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+
 final readonly class QueryResult
 {
     /**
@@ -22,6 +26,31 @@ final readonly class QueryResult
         public bool $success,
         public ?string $error = null,
     ) {
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function toCollection(): Collection
+    {
+        return collect($this->rows);
+    }
+
+    /**
+     * @param class-string<Model> $modelClass
+     * @return EloquentCollection<int, Model>
+     */
+    public function toEloquentCollection(string $modelClass): EloquentCollection
+    {
+        if (!is_a($modelClass, Model::class, true)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Expected an Eloquent model class, got [%s].',
+                $modelClass,
+            ));
+        }
+
+        /** @var Model $modelClass */
+        return $modelClass::hydrate($this->rows);
     }
 
     /**

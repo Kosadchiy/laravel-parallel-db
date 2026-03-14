@@ -16,7 +16,7 @@ When one request needs multiple independent SQL calls, sequential execution adds
 ### Core components
 
 - `ParallelDatabaseManager` - Laravel-facing entrypoint, accepts mixed query inputs.
-- `QueryCompiler` - compiles builder/raw payloads into `CompiledQuery`.
+- `QueryCompiler` - compiles builder payloads into `CompiledQuery`.
 - `ParallelExecutor` - bounded scheduler + timeout + result collection.
 - `DriverRegistry` - maps DB driver names to async implementations.
 - `PostgresAsyncDriver`, `MySqlAsyncDriver` - native async transport.
@@ -27,12 +27,11 @@ When one request needs multiple independent SQL calls, sequential execution adds
 - `CompiledQuery`
 - `RunningQuery`
 - `QueryResult`
-- `ParallelQuery`
 - `ParallelOptions`
 
 ### Execution flow
 
-1. User passes map of queries (`Builder`, `Eloquent`, raw SQL array, or `ParallelQuery`).
+1. User passes map of queries (`Builder`, `Eloquent`, or `Closure` returning one of them).
 2. Compiler normalizes all inputs to `CompiledQuery`.
 3. Executor keeps pending/running sets and starts up to `maxConcurrency` queries.
 4. Drivers poll readiness (`stream_select()` for PostgreSQL sockets, `mysqli_poll()` for MySQL links).
@@ -63,6 +62,10 @@ return [
     'default_max_concurrency' => 3,
     'default_timeout_ms' => 500,
     'error_mode' => 'fail_fast', // fail_fast|collect
+    'pool' => [
+        'enabled' => true,
+        'max_idle_per_key' => 3,
+    ],
 
     'drivers' => [
         'pgsql' => ['enabled' => true],
@@ -82,6 +85,15 @@ $result = DB::parallel()->run([
 ]);
 ```
 
+### Closure factories
+
+```php
+$result = DB::parallel()->run([
+    'users' => fn () => User::query()->where('active', true),
+    'servers' => fn () => DB::table('servers')->where('status', 'ok'),
+]);
+```
+
 ### With options
 
 ```php
@@ -96,26 +108,11 @@ $result = DB::parallel(
     'servers' => Server::query()->where('status', 'ok'),
 ]);
 ```
-
 ### Via specific connection
 
 ```php
 $result = DB::connection('pgsql')->parallel()->run([
-    'users' => ['sql' => 'select * from users where active = ?', 'bindings' => [true]],
-]);
-```
-
-### Explicit `ParallelQuery`
-
-```php
-use Kosadchiy\LaravelParallelDb\DTO\ParallelQuery;
-
-$result = DB::parallel()->run([
-    'audit' => new ParallelQuery(
-        sql: 'insert into audit_log(message, created_at) values (?, ?)',
-        bindings: ['parallel run', now()],
-        connection: 'mysql',
-    ),
+    'users' => User::query()->where('active', true),
 ]);
 ```
 
@@ -133,6 +130,18 @@ Each input key maps to `QueryResult`:
 - `connectionDriver`
 - `success`
 - `error`
+
+## Connection pooling
+
+Idle async connections are pooled by default and reused across `run()` calls inside the same PHP process.
+
+- pool key is based on driver/config;
+- one pooled connection can still serve only one active query at a time;
+- hot runs should show lower connection overhead;
+- this is process-local reuse, not a shared external pool.
+- `maxConcurrency` limits concurrently running queries per `run()`;
+- `max_idle_per_key` limits how many idle pooled connections are retained for one connection config;
+- if pooling is enabled, a long-lived process can keep more open connections than `maxConcurrency`, because completed connections may stay idle in the pool for reuse.
 
 ## Error behavior
 
@@ -167,16 +176,16 @@ Use parallel writes only when this behavior is acceptable.
 ## Limitations and controversial points
 
 1. Async API parity differs between `ext-pgsql` and `ext-mysqli`.
-2. MySQL v1 binding interpolation is pragmatic, not perfect SQL parser behavior.
+2. MySQL async execution in v1 does not use prepared statements; bindings are interpolated with escaping, which is a pragmatic limitation of the transport path.
 3. `stream_select()` has platform limits and FD-scaling caveats for very large sets.
-4. Result hydration is low-level arrays, not Eloquent model hydration.
-5. Parallel writes are independent operations, not atomic group transaction.
+4. Core results are returned as raw rows; `Collection` / Eloquent hydration is only available as an explicit post-processing step.
+5. Parallel writes are independent operations, not an atomic group transaction.
 
 ## Testing
 
 Unit tests cover:
 
-- query compilation from Builder/Eloquent/raw;
+- query compilation from Builder/Eloquent/Closure;
 - bounded concurrency;
 - timeout handling;
 - fail-fast and collect-errors behavior;

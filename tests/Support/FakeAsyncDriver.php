@@ -14,7 +14,13 @@ final class FakeAsyncDriver implements AsyncDriverInterface
     public int $maxActive = 0;
     private int $active = 0;
 
-    public function __construct(private readonly string $name = 'fake')
+    /**
+     * @param array<string, array{duration_ms?: int, fail?: bool, error?: string}> $scenarios
+     */
+    public function __construct(
+        private readonly string $name = 'fake',
+        private readonly array $scenarios = [],
+    )
     {
     }
 
@@ -47,7 +53,7 @@ final class FakeAsyncDriver implements AsyncDriverInterface
         $now = microtime(true);
 
         foreach ($runningQueries as $key => $running) {
-            $durationMs = (int) ($running->query->metadata['duration_ms'] ?? 1);
+            $durationMs = (int) ($this->scenario($running->query->key)['duration_ms'] ?? 1);
             $elapsedMs = ($now - $running->startedAt) * 1000;
 
             if ($elapsedMs >= $durationMs) {
@@ -62,15 +68,16 @@ final class FakeAsyncDriver implements AsyncDriverInterface
     {
         $query = $runningQuery->query;
         $durationMs = (microtime(true) - $runningQuery->startedAt) * 1000;
+        $scenario = $this->scenario($query->key);
 
-        if (($query->metadata['fail'] ?? false) === true) {
+        if (($scenario['fail'] ?? false) === true) {
             return QueryResult::failure(
                 sql: $query->sql,
                 bindings: $query->bindings,
                 type: $query->type,
                 connectionDriver: $query->driver,
                 durationMs: $durationMs,
-                error: (string) ($query->metadata['error'] ?? 'Synthetic failure'),
+                error: (string) ($scenario['error'] ?? 'Synthetic failure'),
             );
         }
 
@@ -91,5 +98,13 @@ final class FakeAsyncDriver implements AsyncDriverInterface
     public function close(RunningQuery $runningQuery): void
     {
         $this->active = max(0, $this->active - 1);
+    }
+
+    /**
+     * @return array{duration_ms?: int, fail?: bool, error?: string}
+     */
+    private function scenario(string $key): array
+    {
+        return $this->scenarios[$key] ?? [];
     }
 }

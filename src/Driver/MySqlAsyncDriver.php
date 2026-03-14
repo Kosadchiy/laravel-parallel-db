@@ -106,8 +106,8 @@ final readonly class MySqlAsyncDriver implements AsyncDriverInterface
             throw new ParallelExecutionException('MySQL async driver expects mysqli connection.');
         }
 
-        $durationMs = (microtime(true) - $runningQuery->startedAt) * 1000;
         $result = $connection->reap_async_query();
+        $durationMs = (microtime(true) - $runningQuery->startedAt) * 1000;
 
         if ($result === false) {
             return QueryResult::failure(

@@ -18,7 +18,14 @@ final class ParallelExecutorTest extends TestCase
 {
     public function testRespectsBoundedConcurrencyAndResultMapping(): void
     {
-        $driver = new FakeAsyncDriver();
+        $driver = new FakeAsyncDriver(scenarios: [
+            'q1' => ['duration_ms' => 20],
+            'q2' => ['duration_ms' => 20],
+            'q3' => ['duration_ms' => 20],
+            'q4' => ['duration_ms' => 20],
+            'q5' => ['duration_ms' => 20],
+            'q6' => ['duration_ms' => 20],
+        ]);
         $executor = new ParallelExecutor(new DriverRegistry([$driver]));
 
         $queries = [];
@@ -30,7 +37,6 @@ final class ParallelExecutorTest extends TestCase
                 type: 'select',
                 connection: 'fake',
                 driver: 'fake',
-                metadata: ['duration_ms' => 20],
             );
         }
 
@@ -44,7 +50,9 @@ final class ParallelExecutorTest extends TestCase
 
     public function testThrowsOnTimeout(): void
     {
-        $driver = new FakeAsyncDriver();
+        $driver = new FakeAsyncDriver(scenarios: [
+            'slow' => ['duration_ms' => 200],
+        ]);
         $executor = new ParallelExecutor(new DriverRegistry([$driver]));
 
         $queries = [
@@ -55,7 +63,6 @@ final class ParallelExecutorTest extends TestCase
                 type: 'select',
                 connection: 'fake',
                 driver: 'fake',
-                metadata: ['duration_ms' => 200],
             ),
         ];
 
@@ -66,7 +73,10 @@ final class ParallelExecutorTest extends TestCase
 
     public function testFailFastThrowsOnFirstError(): void
     {
-        $driver = new FakeAsyncDriver();
+        $driver = new FakeAsyncDriver(scenarios: [
+            'ok' => ['duration_ms' => 1],
+            'bad' => ['duration_ms' => 1, 'fail' => true, 'error' => 'boom'],
+        ]);
         $executor = new ParallelExecutor(new DriverRegistry([$driver]));
 
         $queries = [
@@ -77,7 +87,6 @@ final class ParallelExecutorTest extends TestCase
                 type: 'select',
                 connection: 'fake',
                 driver: 'fake',
-                metadata: ['duration_ms' => 1],
             ),
             new CompiledQuery(
                 key: 'bad',
@@ -86,7 +95,6 @@ final class ParallelExecutorTest extends TestCase
                 type: 'select',
                 connection: 'fake',
                 driver: 'fake',
-                metadata: ['duration_ms' => 1, 'fail' => true, 'error' => 'boom'],
             ),
         ];
 
@@ -97,7 +105,10 @@ final class ParallelExecutorTest extends TestCase
 
     public function testCollectModeKeepsErrorsInResults(): void
     {
-        $driver = new FakeAsyncDriver();
+        $driver = new FakeAsyncDriver(scenarios: [
+            'ok' => ['duration_ms' => 1],
+            'bad' => ['duration_ms' => 1, 'fail' => true, 'error' => 'boom'],
+        ]);
         $executor = new ParallelExecutor(new DriverRegistry([$driver]));
 
         $queries = [
@@ -108,7 +119,6 @@ final class ParallelExecutorTest extends TestCase
                 type: 'select',
                 connection: 'fake',
                 driver: 'fake',
-                metadata: ['duration_ms' => 1],
             ),
             new CompiledQuery(
                 key: 'bad',
@@ -117,7 +127,6 @@ final class ParallelExecutorTest extends TestCase
                 type: 'select',
                 connection: 'fake',
                 driver: 'fake',
-                metadata: ['duration_ms' => 1, 'fail' => true, 'error' => 'boom'],
             ),
         ];
 

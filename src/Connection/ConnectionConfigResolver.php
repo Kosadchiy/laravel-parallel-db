@@ -37,16 +37,4 @@ final readonly class ConnectionConfigResolver
 
         return $config;
     }
-
-    public function connectionDriver(string $connection): string
-    {
-        $config = $this->connectionConfig($connection);
-        $driver = $config['driver'] ?? null;
-
-        if (!is_string($driver) || $driver === '') {
-            throw new ParallelExecutionException("Database connection [{$connection}] has no driver configured.");
-        }
-
-        return $driver;
-    }
 }

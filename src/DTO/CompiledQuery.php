@@ -8,7 +8,6 @@ final readonly class CompiledQuery
 {
     /**
      * @param array<int, mixed> $bindings
-     * @param array<string, mixed> $metadata
      */
     public function __construct(
         public string $key,
@@ -17,7 +16,6 @@ final readonly class CompiledQuery
         public string $type,
         public string $connection,
         public string $driver,
-        public array $metadata = [],
     ) {
     }
 }
