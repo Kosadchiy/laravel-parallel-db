@@ -7,6 +7,8 @@ Laravel package for in-process parallel SQL execution using native async databas
 
 No child processes, no queues, no ReactPHP, Amp, or Swoole.
 
+Status: beta. The package is usable, but APIs and behavior may still evolve and are still being tested in real-world scenarios.
+
 ## Why
 
 When one request needs multiple independent SQL calls, sequential execution adds latency. This package runs them in parallel on separate DB connections in the same PHP process.
@@ -42,6 +44,11 @@ This package is most useful when queries are independent, read-heavy, and latenc
 5. Ready queries are reaped and transformed into `QueryResult`.
 6. Completed connections are returned to the pool when pooling is enabled.
 7. Executor continues until all queries are finished or timeout is reached.
+
+## Laravel versions
+
+- Laravel `12.x`
+- PHP `8.3+`
 
 ## Installation
 

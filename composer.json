@@ -3,8 +3,22 @@
     "description": "Laravel package for in-process parallel SQL execution via native pgsql/mysqli async APIs.",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "database",
+        "parallel",
+        "async",
+        "postgresql",
+        "mysql"
+    ],
+    "homepage": "https://github.com/Kosadchiy/laravel-parallel-db",
+    "support": {
+        "issues": "https://github.com/Kosadchiy/laravel-parallel-db/issues",
+        "source": "https://github.com/Kosadchiy/laravel-parallel-db"
+    },
     "require": {
         "php": "^8.3",
+        "ext-ctype": "*",
         "illuminate/database": "^12.0",
         "illuminate/support": "^12.0"
     },
