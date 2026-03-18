@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb\Tests\Unit;
 
+use Kosadchiy\LaravelParallelDb\Driver\DriverRegistry;
 use Kosadchiy\LaravelParallelDb\DTO\CompiledQuery;
 use Kosadchiy\LaravelParallelDb\DTO\ParallelOptions;
-use Kosadchiy\LaravelParallelDb\Driver\DriverRegistry;
 use Kosadchiy\LaravelParallelDb\Enum\ErrorMode;
 use Kosadchiy\LaravelParallelDb\Exceptions\ParallelQueryFailedException;
 use Kosadchiy\LaravelParallelDb\Exceptions\ParallelQueryTimeoutException;

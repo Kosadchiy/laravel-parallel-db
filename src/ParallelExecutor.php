@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Kosadchiy\LaravelParallelDb;
 
 use Kosadchiy\LaravelParallelDb\Contracts\ParallelExecutorInterface;
+use Kosadchiy\LaravelParallelDb\Driver\DriverRegistry;
 use Kosadchiy\LaravelParallelDb\DTO\CompiledQuery;
 use Kosadchiy\LaravelParallelDb\DTO\ParallelOptions;
 use Kosadchiy\LaravelParallelDb\DTO\QueryResult;
 use Kosadchiy\LaravelParallelDb\DTO\RunningQuery;
-use Kosadchiy\LaravelParallelDb\Driver\DriverRegistry;
 use Kosadchiy\LaravelParallelDb\Enum\ErrorMode;
 use Kosadchiy\LaravelParallelDb\Exceptions\ParallelQueryFailedException;
 use Kosadchiy\LaravelParallelDb\Exceptions\ParallelQueryTimeoutException;

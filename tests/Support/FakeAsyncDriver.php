@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb\Tests\Support;
 
+use Kosadchiy\LaravelParallelDb\Driver\AsyncDriverInterface;
 use Kosadchiy\LaravelParallelDb\DTO\CompiledQuery;
 use Kosadchiy\LaravelParallelDb\DTO\QueryResult;
 use Kosadchiy\LaravelParallelDb\DTO\RunningQuery;
-use Kosadchiy\LaravelParallelDb\Driver\AsyncDriverInterface;
 
 final class FakeAsyncDriver implements AsyncDriverInterface
 {
@@ -20,8 +20,7 @@ final class FakeAsyncDriver implements AsyncDriverInterface
     public function __construct(
         private readonly string $name = 'fake',
         private readonly array $scenarios = [],
-    )
-    {
+    ) {
     }
 
     public function name(): string

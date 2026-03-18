@@ -12,10 +12,10 @@ use Kosadchiy\LaravelParallelDb\Connection\ConnectionPool;
 use Kosadchiy\LaravelParallelDb\Connection\MySqlConnectionFactory;
 use Kosadchiy\LaravelParallelDb\Connection\PooledConnectionFactory;
 use Kosadchiy\LaravelParallelDb\Connection\PostgresConnectionFactory;
-use Kosadchiy\LaravelParallelDb\DTO\ParallelOptions;
 use Kosadchiy\LaravelParallelDb\Driver\DriverRegistry;
 use Kosadchiy\LaravelParallelDb\Driver\MySqlAsyncDriver;
 use Kosadchiy\LaravelParallelDb\Driver\PostgresAsyncDriver;
+use Kosadchiy\LaravelParallelDb\DTO\ParallelOptions;
 use Kosadchiy\LaravelParallelDb\Enum\ErrorMode;
 
 final class LaravelParallelDbServiceProvider extends ServiceProvider

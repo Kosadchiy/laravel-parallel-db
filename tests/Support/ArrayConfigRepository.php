@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb\Tests\Support;
 
-use Illuminate\Contracts\Config\Repository;
 use ArrayAccess;
+use Illuminate\Contracts\Config\Repository;
 
 final class ArrayConfigRepository implements Repository, ArrayAccess
 {

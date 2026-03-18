@@ -108,5 +108,4 @@ final class PostgresPlaceholderConverter
     {
         return ctype_alnum($char) || $char === '_' || $char === '(' || $char === '[' || $char === '"' || $char === '\'' || $char === '$';
     }
-
 }
