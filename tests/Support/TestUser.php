@@ -6,6 +6,10 @@ namespace Kosadchiy\LaravelParallelDb\Tests\Support;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $name
+ */
 final class TestUser extends Model
 {
     /** @var string */
@@ -19,7 +23,4 @@ final class TestUser extends Model
      */
     protected $guarded = [];
 
-    public int $id;
-
-    public string $name;
 }
