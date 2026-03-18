@@ -159,6 +159,7 @@ $result = DB::parallel(
     'servers' => Server::query()->where('status', 'ok'),
 ]);
 ```
+
 ### Via specific connection
 
 ```php
@@ -309,4 +310,23 @@ Run:
 composer test
 ```
 
-Integration tests with real DB engines are intentionally opt-in (`tests/Integration`).
+Integration tests cover:
+
+- public API query shapes (`Query\Builder`, `Eloquent\Builder`, `Closure`);
+- raw compiled write queries through `ParallelExecutor`;
+- `collect` vs `fail_fast`;
+- timeout behavior;
+- transaction visibility across separate async connections.
+
+Run:
+
+```bash
+composer test:integration
+```
+
+Notes:
+
+- the integration suite uses `orchestra/testbench`;
+- it requires real PostgreSQL and MySQL instances plus `ext-pgsql` and `ext-mysqli`;
+- when those services are unavailable locally, the integration suite skips cleanly;
+- in CI, integration tests run against dedicated PostgreSQL and MySQL service containers.
