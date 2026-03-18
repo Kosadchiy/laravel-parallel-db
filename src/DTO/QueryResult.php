@@ -7,6 +7,7 @@ namespace Kosadchiy\LaravelParallelDb\DTO;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Kosadchiy\LaravelParallelDb\Enum\QueryType;
 
 final readonly class QueryResult
 {
@@ -17,7 +18,7 @@ final readonly class QueryResult
     public function __construct(
         public string $sql,
         public array $bindings,
-        public string $type,
+        public QueryType $type,
         public array $rows,
         public int $rowCount,
         public ?string $lastInsertId,
@@ -71,7 +72,7 @@ final readonly class QueryResult
     public static function failure(
         string $sql,
         array $bindings,
-        string $type,
+        QueryType $type,
         string $connectionDriver,
         float $durationMs,
         string $error,

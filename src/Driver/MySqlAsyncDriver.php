@@ -13,6 +13,7 @@ use Kosadchiy\LaravelParallelDb\Exceptions\ParallelExecutionException;
 use Kosadchiy\LaravelParallelDb\Support\MysqlBindingInterpolator;
 use mysqli;
 use mysqli_result;
+use mysqli_sql_exception;
 
 final readonly class MySqlAsyncDriver implements AsyncDriverInterface
 {
@@ -106,17 +107,19 @@ final readonly class MySqlAsyncDriver implements AsyncDriverInterface
             throw new ParallelExecutionException('MySQL async driver expects mysqli connection.');
         }
 
-        $result = $connection->reap_async_query();
         $durationMs = (microtime(true) - $runningQuery->startedAt) * 1000;
 
+        try {
+            $result = $connection->reap_async_query();
+        } catch (mysqli_sql_exception $exception) {
+            return $this->failureResult($query, $durationMs, $exception->getMessage());
+        }
+
         if ($result === false) {
-            return QueryResult::failure(
-                sql: $query->sql,
-                bindings: $query->bindings,
-                type: $query->type,
-                connectionDriver: $query->driver,
-                durationMs: $durationMs,
-                error: $connection->error !== '' ? $connection->error : 'Unknown MySQL async error',
+            return $this->failureResult(
+                $query,
+                $durationMs,
+                $connection->error ?: 'Unknown MySQL async error',
             );
         }
 
@@ -158,5 +161,17 @@ final readonly class MySqlAsyncDriver implements AsyncDriverInterface
     public function close(RunningQuery $runningQuery): void
     {
         $this->connectionFactory->close($runningQuery->connectionHandle);
+    }
+
+    private function failureResult(CompiledQuery $query, float $durationMs, string $error): QueryResult
+    {
+        return QueryResult::failure(
+            sql: $query->sql,
+            bindings: $query->bindings,
+            type: $query->type,
+            connectionDriver: $query->driver,
+            durationMs: $durationMs,
+            error: $error,
+        );
     }
 }

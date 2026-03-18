@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb\DTO;
 
+use Kosadchiy\LaravelParallelDb\Enum\QueryType;
+
 final readonly class CompiledQuery
 {
     /**
@@ -13,7 +15,7 @@ final readonly class CompiledQuery
         public string $key,
         public string $sql,
         public array $bindings,
-        public string $type,
+        public QueryType $type,
         public string $connection,
         public string $driver,
     ) {

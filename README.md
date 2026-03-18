@@ -1,9 +1,9 @@
-# laravel-parallel-db
+# Laravel Parallel DB Queries
 
 [![CI](https://github.com/Kosadchiy/laravel-parallel-db/actions/workflows/ci.yml/badge.svg)](https://github.com/Kosadchiy/laravel-parallel-db/actions/workflows/ci.yml)
 [![PHP 8.3+](https://img.shields.io/badge/PHP-8.3%2B-777BB4.svg)](https://www.php.net/)
 
-Laravel package for in-process parallel SQL execution using native async database APIs:
+Parallel SQL queries for Laravel using native async database APIs:
 
 - PostgreSQL: `ext-pgsql` (`pg_send_query_params`, `pg_socket`, `pg_consume_input`, `pg_connection_busy`, `pg_get_result`)
 - MySQL: `ext-mysqli` (`MYSQLI_ASYNC`, `mysqli_poll`, `reap_async_query`)
@@ -159,6 +159,7 @@ $result = DB::parallel(
     'servers' => Server::query()->where('status', 'ok'),
 ]);
 ```
+
 ### Via specific connection
 
 ```php
@@ -309,4 +310,23 @@ Run:
 composer test
 ```
 
-Integration tests with real DB engines are intentionally opt-in (`tests/Integration`).
+Integration tests cover:
+
+- public API query shapes (`Query\Builder`, `Eloquent\Builder`, `Closure`);
+- raw compiled write queries through `ParallelExecutor`;
+- `collect` vs `fail_fast`;
+- timeout behavior;
+- transaction visibility across separate async connections.
+
+Run:
+
+```bash
+composer test:integration
+```
+
+Notes:
+
+- the integration suite uses `orchestra/testbench`;
+- it requires real PostgreSQL and MySQL instances plus `ext-pgsql` and `ext-mysqli`;
+- when those services are unavailable locally, the integration suite skips cleanly;
+- in CI, integration tests run against dedicated PostgreSQL and MySQL service containers.
