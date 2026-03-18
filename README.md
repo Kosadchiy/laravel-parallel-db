@@ -1,5 +1,8 @@
 # laravel-parallel-db
 
+[![CI](https://github.com/Kosadchiy/laravel-parallel-db/actions/workflows/ci.yml/badge.svg)](https://github.com/Kosadchiy/laravel-parallel-db/actions/workflows/ci.yml)
+[![PHP 8.3+](https://img.shields.io/badge/PHP-8.3%2B-777BB4.svg)](https://www.php.net/)
+
 Laravel package for in-process parallel SQL execution using native async database APIs:
 
 - PostgreSQL: `ext-pgsql` (`pg_send_query_params`, `pg_socket`, `pg_consume_input`, `pg_connection_busy`, `pg_get_result`)

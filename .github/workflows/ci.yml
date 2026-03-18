@@ -102,10 +102,17 @@ jobs:
         run: vendor/bin/phpstan analyse src tests --memory-limit 2G
 
   tests:
-    name: Tests
+    name: Tests (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     needs: phpstan
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - '8.3'
+          - '8.4'
+          - '8.5'
 
     steps:
       - name: Checkout repository
@@ -114,7 +121,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: ${{ matrix.php-version }}
           coverage: none
           extensions: ctype, mbstring, mysqli, pgsql
 
@@ -122,9 +129,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.composer/cache/files
-          key: ${{ runner.os }}-php-8.3-composer-${{ hashFiles('composer.lock') }}
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-php-8.3-composer-
+            ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
