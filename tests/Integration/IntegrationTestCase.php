@@ -120,10 +120,12 @@ abstract class IntegrationTestCase extends TestCase
         QueryType $type,
         string $connection,
     ): CompiledQuery {
+        $preparedBindings = DB::connection($connection)->prepareBindings($bindings);
+
         return new CompiledQuery(
             key: $key,
             sql: $sql,
-            bindings: $bindings,
+            bindings: $preparedBindings,
             type: $type,
             connection: $connection,
             driver: $connection,
