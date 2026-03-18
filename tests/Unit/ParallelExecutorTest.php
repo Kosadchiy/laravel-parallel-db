@@ -8,6 +8,7 @@ use Kosadchiy\LaravelParallelDb\Driver\DriverRegistry;
 use Kosadchiy\LaravelParallelDb\DTO\CompiledQuery;
 use Kosadchiy\LaravelParallelDb\DTO\ParallelOptions;
 use Kosadchiy\LaravelParallelDb\Enum\ErrorMode;
+use Kosadchiy\LaravelParallelDb\Enum\QueryType;
 use Kosadchiy\LaravelParallelDb\Exceptions\ParallelQueryFailedException;
 use Kosadchiy\LaravelParallelDb\Exceptions\ParallelQueryTimeoutException;
 use Kosadchiy\LaravelParallelDb\ParallelExecutor;
@@ -34,7 +35,7 @@ final class ParallelExecutorTest extends TestCase
                 key: 'q' . $i,
                 sql: 'select ' . $i,
                 bindings: [],
-                type: 'select',
+                type: QueryType::SELECT,
                 connection: 'fake',
                 driver: 'fake',
             );
@@ -60,7 +61,7 @@ final class ParallelExecutorTest extends TestCase
                 key: 'slow',
                 sql: 'select 1',
                 bindings: [],
-                type: 'select',
+                type: QueryType::SELECT,
                 connection: 'fake',
                 driver: 'fake',
             ),
@@ -84,7 +85,7 @@ final class ParallelExecutorTest extends TestCase
                 key: 'ok',
                 sql: 'select 1',
                 bindings: [],
-                type: 'select',
+                type: QueryType::SELECT,
                 connection: 'fake',
                 driver: 'fake',
             ),
@@ -92,7 +93,7 @@ final class ParallelExecutorTest extends TestCase
                 key: 'bad',
                 sql: 'select 2',
                 bindings: [],
-                type: 'select',
+                type: QueryType::SELECT,
                 connection: 'fake',
                 driver: 'fake',
             ),
@@ -116,7 +117,7 @@ final class ParallelExecutorTest extends TestCase
                 key: 'ok',
                 sql: 'select 1',
                 bindings: [],
-                type: 'select',
+                type: QueryType::SELECT,
                 connection: 'fake',
                 driver: 'fake',
             ),
@@ -124,7 +125,7 @@ final class ParallelExecutorTest extends TestCase
                 key: 'bad',
                 sql: 'select 2',
                 bindings: [],
-                type: 'select',
+                type: QueryType::SELECT,
                 connection: 'fake',
                 driver: 'fake',
             ),

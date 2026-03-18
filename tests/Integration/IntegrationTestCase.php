@@ -7,8 +7,12 @@ namespace Kosadchiy\LaravelParallelDb\Tests\Integration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Kosadchiy\LaravelParallelDb\DTO\CompiledQuery;
+use Kosadchiy\LaravelParallelDb\DTO\ParallelOptions;
+use Kosadchiy\LaravelParallelDb\Enum\QueryType;
 use Kosadchiy\LaravelParallelDb\LaravelParallelDbServiceProvider;
 use Kosadchiy\LaravelParallelDb\ParallelDatabaseManager;
+use Kosadchiy\LaravelParallelDb\ParallelExecutor;
 use Orchestra\Testbench\TestCase;
 use Throwable;
 
@@ -86,6 +90,7 @@ abstract class IntegrationTestCase extends TestCase
         $schema->create('parallel_test_users', static function (Blueprint $table): void {
             $table->increments('id');
             $table->string('name');
+            $table->boolean('active')->default(true);
         });
     }
 
@@ -95,5 +100,42 @@ abstract class IntegrationTestCase extends TestCase
         self::assertNotNull($app);
 
         return $app->make(ParallelDatabaseManager::class)->withOptions(connection: $connection);
+    }
+
+    protected function parallelExecutor(): ParallelExecutor
+    {
+        $app = $this->app;
+        self::assertNotNull($app);
+
+        return $app->make(ParallelExecutor::class);
+    }
+
+    /**
+     * @param array<int, mixed> $bindings
+     */
+    protected function compiledQuery(
+        string $key,
+        string $sql,
+        array $bindings,
+        QueryType $type,
+        string $connection,
+    ): CompiledQuery {
+        return new CompiledQuery(
+            key: $key,
+            sql: $sql,
+            bindings: $bindings,
+            type: $type,
+            connection: $connection,
+            driver: $connection,
+        );
+    }
+
+    protected function defaultParallelOptions(string $connection): ParallelOptions
+    {
+        return new ParallelOptions(
+            maxConcurrency: 2,
+            timeoutMs: 2000,
+            connection: $connection,
+        );
     }
 }

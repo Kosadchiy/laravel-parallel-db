@@ -7,6 +7,7 @@ namespace Kosadchiy\LaravelParallelDb\Tests\Unit;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Kosadchiy\LaravelParallelDb\DTO\QueryResult;
+use Kosadchiy\LaravelParallelDb\Enum\QueryType;
 use Kosadchiy\LaravelParallelDb\Tests\Support\TestUser;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,7 @@ final class QueryResultTest extends TestCase
         $result = new QueryResult(
             sql: 'select * from users',
             bindings: [],
-            type: 'select',
+            type: QueryType::SELECT,
             rows: [
                 ['id' => 1, 'name' => 'Alice'],
                 ['id' => 2, 'name' => 'Bob'],
@@ -44,7 +45,7 @@ final class QueryResultTest extends TestCase
         $result = new QueryResult(
             sql: 'select * from users',
             bindings: [],
-            type: 'select',
+            type: QueryType::SELECT,
             rows: [
                 ['id' => 1, 'name' => 'Alice'],
                 ['id' => 2, 'name' => 'Bob'],
@@ -70,7 +71,7 @@ final class QueryResultTest extends TestCase
         $result = new QueryResult(
             sql: 'select 1',
             bindings: [],
-            type: 'select',
+            type: QueryType::SELECT,
             rows: [],
             rowCount: 0,
             lastInsertId: null,

@@ -9,12 +9,13 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\DatabaseManager;
 use Kosadchiy\LaravelParallelDb\Connection\ConnectionConfigResolver;
 use Kosadchiy\LaravelParallelDb\Enum\QueryType;
+use Kosadchiy\LaravelParallelDb\Exceptions\QueryCompilationException;
 use Kosadchiy\LaravelParallelDb\QueryCompiler;
 use Kosadchiy\LaravelParallelDb\Tests\Support\ArrayConfigRepository;
 use Kosadchiy\LaravelParallelDb\Tests\Support\TestUser;
 use PHPUnit\Framework\TestCase;
 
-final class QueryCompilerTest extends TestCase
+final class QueryCompilerAdvancedTest extends TestCase
 {
     private QueryCompiler $compiler;
     private DatabaseManager $database;
@@ -52,53 +53,60 @@ final class QueryCompilerTest extends TestCase
         );
     }
 
-    public function testCompilesQueryBuilder(): void
+    public function testCompilesComplexQueryBuilderShape(): void
     {
         $compiled = $this->compiler->compileMany([
-            'users' => $this->database->table('users')->where('active', true),
+            'active_users' => $this->database->table('users')
+                ->join('profiles', 'profiles.user_id', '=', 'users.id')
+                ->select('users.id', 'profiles.country')
+                ->where('users.active', true)
+                ->whereIn('profiles.country', ['CY', 'US'])
+                ->orderBy('users.id'),
         ]);
 
-        self::assertCount(1, $compiled);
+        self::assertSame('active_users', $compiled[0]->key);
+        self::assertSame(QueryType::SELECT, $compiled[0]->type);
+        self::assertSame([1, 'CY', 'US'], $compiled[0]->bindings);
+        self::assertStringContainsString('join "profiles"', $compiled[0]->sql);
+        self::assertStringContainsString('where "users"."active" = ?', $compiled[0]->sql);
+    }
+
+    public function testCompilesClosureCapturingVariablesIntoQueryBuilder(): void
+    {
+        $active = true;
+        $countries = ['CY', 'US'];
+
+        $compiled = $this->compiler->compileMany([
+            'users' => fn () => $this->database->table('users')
+                ->select('id', 'name')
+                ->where('active', $active)
+                ->whereIn('country', $countries),
+        ]);
+
         self::assertSame('users', $compiled[0]->key);
+        self::assertSame([1, 'CY', 'US'], $compiled[0]->bindings);
+    }
+
+    public function testCompilesEloquentBuilderWithCustomConnectionName(): void
+    {
+        TestUser::setConnectionResolver($this->database);
+        $builder = TestUser::on('default')->where('active', 1);
+
+        $compiled = $this->compiler->compileMany([
+            'users' => $builder,
+        ]);
+
+        self::assertSame('default', $compiled[0]->connection);
         self::assertSame('sqlite', $compiled[0]->driver);
         self::assertSame(QueryType::SELECT, $compiled[0]->type);
-        self::assertSame([1], $compiled[0]->bindings);
     }
 
-    public function testCompilesEloquentBuilder(): void
+    public function testThrowsForUnsupportedQueryPayload(): void
     {
-        TestUser::setConnectionResolver($this->database);
+        $this->expectException(QueryCompilationException::class);
 
-        $compiled = $this->compiler->compileMany([
-            'users' => TestUser::query()->where('active', 1),
+        $this->compiler->compileMany([
+            'bad' => 'select * from users',
         ]);
-
-        self::assertSame('users', $compiled[0]->key);
-        self::assertSame(QueryType::SELECT, $compiled[0]->type);
-        self::assertSame([1], $compiled[0]->bindings);
-    }
-
-    public function testCompilesClosureReturningBuilder(): void
-    {
-        $compiled = $this->compiler->compileMany([
-            'users' => fn () => $this->database->table('users')->where('active', false),
-        ]);
-
-        self::assertSame('users', $compiled[0]->key);
-        self::assertSame(QueryType::SELECT, $compiled[0]->type);
-        self::assertSame([0], $compiled[0]->bindings);
-    }
-
-    public function testCompilesClosureReturningEloquentBuilder(): void
-    {
-        TestUser::setConnectionResolver($this->database);
-
-        $compiled = $this->compiler->compileMany([
-            'users' => fn () => TestUser::query()->where('active', 0),
-        ]);
-
-        self::assertSame('users', $compiled[0]->key);
-        self::assertSame(QueryType::SELECT, $compiled[0]->type);
-        self::assertSame([0], $compiled[0]->bindings);
     }
 }
