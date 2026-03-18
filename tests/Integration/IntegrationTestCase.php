@@ -8,6 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Kosadchiy\LaravelParallelDb\LaravelParallelDbServiceProvider;
+use Kosadchiy\LaravelParallelDb\ParallelDatabaseManager;
 use Orchestra\Testbench\TestCase;
 use Throwable;
 
@@ -86,5 +87,13 @@ abstract class IntegrationTestCase extends TestCase
             $table->increments('id');
             $table->string('name');
         });
+    }
+
+    protected function parallelManager(string $connection): ParallelDatabaseManager
+    {
+        $app = $this->app;
+        self::assertNotNull($app);
+
+        return $app->make(ParallelDatabaseManager::class)->withOptions(connection: $connection);
     }
 }
