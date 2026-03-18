@@ -22,5 +22,4 @@ final class TestUser extends Model
      * @var list<string>
      */
     protected $guarded = [];
-
 }
