@@ -122,7 +122,7 @@ final readonly class MySqlAsyncDriver implements AsyncDriverInterface
 
         if ($result instanceof mysqli_result) {
             $rows = $result->fetch_all(MYSQLI_ASSOC);
-            $rowCount = $result->num_rows;
+            $rowCount = (int) $result->num_rows;
             $result->free();
 
             return new QueryResult(
@@ -146,7 +146,7 @@ final readonly class MySqlAsyncDriver implements AsyncDriverInterface
             bindings: $query->bindings,
             type: $query->type,
             rows: [],
-            rowCount: $connection->affected_rows,
+            rowCount: (int) $connection->affected_rows,
             lastInsertId: $insertId,
             durationMs: $durationMs,
             connectionDriver: $query->driver,

@@ -37,8 +37,9 @@ final readonly class QueryResult
     }
 
     /**
-     * @param class-string<Model> $modelClass
-     * @return EloquentCollection<int, Model>
+     * @template TModel of Model
+     * @param class-string<TModel> $modelClass
+     * @return EloquentCollection<int, TModel>
      */
     public function toEloquentCollection(string $modelClass): EloquentCollection
     {
@@ -49,8 +50,19 @@ final readonly class QueryResult
             ));
         }
 
-        /** @var Model $modelClass */
-        return $modelClass::hydrate($this->rows);
+        $model = new $modelClass();
+        $items = [];
+
+        foreach ($this->rows as $row) {
+            /** @var TModel $hydrated */
+            $hydrated = $model->newFromBuilder($row);
+            $items[] = $hydrated;
+        }
+
+        /** @var EloquentCollection<int, TModel> $collection */
+        $collection = $model->newCollection($items);
+
+        return $collection;
     }
 
     /**

@@ -7,6 +7,9 @@ namespace Kosadchiy\LaravelParallelDb\Tests\Support;
 use ArrayAccess;
 use Illuminate\Contracts\Config\Repository;
 
+/**
+ * @implements ArrayAccess<string, mixed>
+ */
 final class ArrayConfigRepository implements Repository, ArrayAccess
 {
     /**
@@ -21,6 +24,10 @@ final class ArrayConfigRepository implements Repository, ArrayAccess
         return $this->get($key) !== null;
     }
 
+    /**
+     * @param string|array<int, string>|null $key
+     * @return ($key is array ? array<string, mixed> : mixed)
+     */
     public function get($key, $default = null): mixed
     {
         if (is_array($key)) {
@@ -51,11 +58,17 @@ final class ArrayConfigRepository implements Repository, ArrayAccess
         return $value;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function all(): array
     {
         return $this->items;
     }
 
+    /**
+     * @param string|array<string, mixed>|null $key
+     */
     public function set($key, $value = null): void
     {
         if (is_array($key)) {
@@ -141,7 +154,7 @@ final class ArrayConfigRepository implements Repository, ArrayAccess
             $target = &$target[$segment];
         }
 
-        if ($last !== null && is_array($target) && array_key_exists($last, $target)) {
+        if ($last !== null && array_key_exists($last, $target)) {
             unset($target[$last]);
         }
     }

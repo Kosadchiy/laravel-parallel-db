@@ -11,6 +11,7 @@ final class PostgresPlaceholderConverter
     /**
      * Converts SQL placeholders from ? to $1..$N for pg_send_query_params.
      *
+     * @param array<int, mixed> $bindings
      * @return array{sql: string, bindings: array<int, mixed>}
      */
     public static function questionMarksToPgParams(string $sql, array $bindings): array

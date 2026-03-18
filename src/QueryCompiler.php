@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kosadchiy\LaravelParallelDb;
 
 use Closure;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Kosadchiy\LaravelParallelDb\Connection\ConnectionConfigResolver;
@@ -47,9 +48,13 @@ final readonly class QueryCompiler implements QueryCompilerInterface
         ));
     }
 
+    /**
+     * @param QueryBuilder|EloquentBuilder<\Illuminate\Database\Eloquent\Model> $builder
+     */
     private function compileBuilder(string $key, QueryBuilder|EloquentBuilder $builder, ?string $defaultConnection): CompiledQuery
     {
         $base = $builder instanceof EloquentBuilder ? $builder->getQuery() : $builder;
+        /** @var Connection $connection */
         $connection = $base->getConnection();
 
         $connectionName = $connection->getName()

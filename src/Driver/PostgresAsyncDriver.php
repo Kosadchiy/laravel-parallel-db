@@ -264,6 +264,9 @@ final readonly class PostgresAsyncDriver implements AsyncDriverInterface
         return $result;
     }
 
+    /**
+     * @param array<int, resource> $read
+     */
     private function streamSelect(array &$read, mixed &$write, mixed &$except, int $seconds, int $microseconds): int
     {
         $warning = null;

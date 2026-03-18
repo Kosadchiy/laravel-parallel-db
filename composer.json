@@ -24,7 +24,9 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",
-        "symplify/easy-coding-standard": "^13.0"
+        "symplify/easy-coding-standard": "^13.0",
+        "larastan/larastan": "^3.0",
+        "phpstan/phpstan": "^2.1"
     },
     "suggest": {
         "ext-pgsql": "Required for PostgreSQL async execution",
@@ -54,6 +56,9 @@
         ],
         "lint-fix": [
             "./vendor/bin/ecs check . --fix --memory-limit=2G"
+        ],
+        "phpstan": [
+            "./vendor/bin/phpstan analyse --memory-limit 2G"
         ]
     },
     "minimum-stability": "stable",

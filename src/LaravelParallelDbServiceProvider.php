@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kosadchiy\LaravelParallelDb;
 
+use Illuminate\Container\Container;
 use Illuminate\Database\Connection;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
@@ -87,7 +88,7 @@ final class LaravelParallelDbServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/parallel-db.php' => config_path('parallel-db.php'),
+            __DIR__ . '/../config/parallel-db.php' => $this->app->configPath('parallel-db.php'),
         ], 'parallel-db-config');
 
         DatabaseManager::macro('parallel', function (
@@ -100,7 +101,7 @@ final class LaravelParallelDbServiceProvider extends ServiceProvider
                 ? $errorMode
                 : ErrorMode::tryFrom((string) ($errorMode ?? ''));
 
-            return app(ParallelDatabaseManager::class)->withOptions(
+            return Container::getInstance()->make(ParallelDatabaseManager::class)->withOptions(
                 maxConcurrency: $maxConcurrency,
                 timeoutMs: $timeoutMs,
                 errorMode: $mode,
@@ -118,7 +119,7 @@ final class LaravelParallelDbServiceProvider extends ServiceProvider
                 ? $errorMode
                 : ErrorMode::tryFrom((string) ($errorMode ?? ''));
 
-            return app(ParallelDatabaseManager::class)->withOptions(
+            return Container::getInstance()->make(ParallelDatabaseManager::class)->withOptions(
                 maxConcurrency: $maxConcurrency,
                 timeoutMs: $timeoutMs,
                 errorMode: $mode,

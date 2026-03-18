@@ -30,10 +30,13 @@ final class QueryResultTest extends TestCase
         );
 
         $collection = $result->toCollection();
+        $firstRow = $collection->first();
 
         self::assertInstanceOf(Collection::class, $collection);
         self::assertCount(2, $collection);
-        self::assertSame('Alice', $collection->first()['name']);
+        self::assertIsArray($firstRow);
+        self::assertArrayHasKey('name', $firstRow);
+        self::assertSame('Alice', $firstRow['name']);
     }
 
     public function testToEloquentCollectionHydratesModels(): void
@@ -53,6 +56,7 @@ final class QueryResultTest extends TestCase
             success: true,
         );
 
+        /** @var EloquentCollection<int, TestUser> $collection */
         $collection = $result->toEloquentCollection(TestUser::class);
 
         self::assertInstanceOf(EloquentCollection::class, $collection);
@@ -77,6 +81,11 @@ final class QueryResultTest extends TestCase
 
         $this->expectException(\InvalidArgumentException::class);
 
-        $result->toEloquentCollection(Collection::class);
+        /** @var string $invalidModelClass */
+        $invalidModelClass = Collection::class;
+
+        // Runtime validation intentionally accepts arbitrary strings and rejects non-model classes.
+        /** @phpstan-ignore-next-line */
+        $result->toEloquentCollection($invalidModelClass);
     }
 }
