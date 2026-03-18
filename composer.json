@@ -26,7 +26,8 @@
         "phpunit/phpunit": "^11.0",
         "symplify/easy-coding-standard": "^13.0",
         "larastan/larastan": "^3.0",
-        "phpstan/phpstan": "^2.1"
+        "phpstan/phpstan": "^2.1",
+        "orchestra/testbench": "^10.0"
     },
     "suggest": {
         "ext-pgsql": "Required for PostgreSQL async execution",
@@ -50,7 +51,8 @@
         }
     },
     "scripts": {
-        "test": "phpunit",
+        "test": "phpunit --testsuite Unit",
+        "test:integration": "phpunit --testsuite Integration",
         "lint": [
             "./vendor/bin/ecs check ."
         ],

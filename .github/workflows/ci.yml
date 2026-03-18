@@ -103,7 +103,7 @@ jobs:
         run: vendor/bin/phpstan analyse src tests --memory-limit 2G
 
   tests:
-    name: Tests (PHP ${{ matrix.php-version }})
+    name: Unit Tests (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     needs: phpstan
     timeout-minutes: 10
@@ -139,3 +139,73 @@ jobs:
 
       - name: Run PHPUnit
         run: composer test
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: tests
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: laravel_parallel_db
+          POSTGRES_USER: laravel_parallel_db
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U laravel_parallel_db -d laravel_parallel_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: laravel_parallel_db
+          MYSQL_USER: laravel_parallel_db
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ularavel_parallel_db -psecret"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          extensions: ctype, mbstring, mysqli, pgsql
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-php-8.3-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-8.3-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run integration tests
+        env:
+          TEST_PGSQL_HOST: 127.0.0.1
+          TEST_PGSQL_PORT: 5432
+          TEST_PGSQL_DATABASE: laravel_parallel_db
+          TEST_PGSQL_USERNAME: laravel_parallel_db
+          TEST_PGSQL_PASSWORD: secret
+          TEST_MYSQL_HOST: 127.0.0.1
+          TEST_MYSQL_PORT: 3306
+          TEST_MYSQL_DATABASE: laravel_parallel_db
+          TEST_MYSQL_USERNAME: laravel_parallel_db
+          TEST_MYSQL_PASSWORD: secret
+        run: composer test:integration
